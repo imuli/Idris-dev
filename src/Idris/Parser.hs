@@ -8,7 +8,7 @@ module Idris.Parser(module Idris.Parser,
 
 import Prelude hiding (pi)
 
-import qualified System.Directory as Dir (makeAbsolute)
+import qualified System.Directory as Dir (canonicalizePath)
 
 import Text.Trifecta.Delta
 import Text.Trifecta hiding (span, stringLiteral, charLiteral, natural, symbol, char, string, whiteSpace, Err)
@@ -1271,7 +1271,7 @@ parseImports fname input
               Failure err -> fail (show err)
               Success (x, annots, i) ->
                 do putIState i
-                   fname' <- runIO $ Dir.makeAbsolute fname
+                   fname' <- runIO $ Dir.canonicalizePath fname
                    sendHighlighting $ addPath annots fname'
                    return x
   where imports :: IdrisParser ((Maybe (Docstring ()), [String],
@@ -1425,7 +1425,7 @@ loadSource lidr f toline
                                                          LIDR fn -> Just fn
                                                          _ -> Nothing
                                            srcFnAbs <- case srcFn of
-                                                         Just fn -> fmap Just (runIO $ Dir.makeAbsolute fn)
+                                                         Just fn -> fmap Just (runIO $ Dir.canonicalizePath fn)
                                                          Nothing -> return Nothing
                                            sendHighlighting [(nfc, AnnNamespace ns srcFnAbs)])
                         [(re, fn, ns, nfc) | ImportInfo re fn _ ns _ nfc <- imports]
