@@ -114,6 +114,18 @@ fgetc (FHandle h) = do let c = cast !(foreign FFI_C "fgetc" (Ptr -> IO Int) h)
                           then return (Left FileReadError)
                           else return (Right c)
 
+fGetByte : File -> IO (Either FileError Int)
+fGetByte (FHandle h) = do r <- foreign FFI_C "fgetc" (Ptr -> IO Int) h
+                          return $ if r < 0
+                                      then (Left FileReadError)
+                                      else (Right r)
+
+fPutByte : File -> (byte : Int) -> IO (Either FileError ())
+fPutByte (FHandle h) byte = do r <- foreign FFI_C "fputc" (Int -> Ptr -> IO Int) byte h
+                               return $ if r < 0
+                                           then (Left FileWriteError)
+                                           else (Right ())
+
 fflush : File -> IO ()
 fflush (FHandle h) = foreign FFI_C "fflush" (Ptr -> IO ()) h
 
